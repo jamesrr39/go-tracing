@@ -78,15 +78,15 @@ func StartSpan(ctx context.Context, name string) (*Span, error) {
 	}, nil
 }
 
-func (span *Span) End(ctx context.Context) error {
+func (span *Span) End(ctx context.Context) {
 	traceVal := ctx.Value(TraceCtxKey)
 	if traceVal == nil {
-		return fmt.Errorf("Trace: no trace in context")
+		panic("Trace: no trace in context")
 	}
 
 	tracerVal := ctx.Value(TracerCtxKey)
 	if tracerVal == nil {
-		return fmt.Errorf("Trace: no tracer in context")
+		panic("Trace: no tracer in context")
 	}
 
 	trace := traceVal.(*Trace)
@@ -94,7 +94,6 @@ func (span *Span) End(ctx context.Context) error {
 	span.EndTimeNanos = tracer.nowFunc().UnixNano()
 
 	trace.Spans = append(trace.Spans, span)
-	return nil
 }
 
 func (tracer *Tracer) EndTrace(trace *Trace, summary string) error {

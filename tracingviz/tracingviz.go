@@ -65,8 +65,8 @@ func Generate(dataFilePath, outFilePath string) errorsx.Error {
 	defer outFile.Close()
 
 	data := tplData{
-		TracerDataJSON: string(tracesJSONData),
-		MainJS:         mainJS,
+		TracerDataJSON: template.JS(tracesJSONData),
+		MainJS:         template.JS(mainJS),
 	}
 
 	err = gotpl.Execute(outFile, data)
@@ -78,14 +78,14 @@ func Generate(dataFilePath, outFilePath string) errorsx.Error {
 }
 
 type tplData struct {
-	TracerDataJSON, MainJS string
+	TracerDataJSON, MainJS template.JS
 }
 
 var gotpl = template.Must(template.New("profileviz").Parse(`
 <html>
     <head>
     <meta charset="UTF-8">
-    <title>React + htm Demo</title>
+    <title>Tracing</title>
 
     <style type="text/css">
         .events-table {
@@ -103,6 +103,9 @@ var gotpl = template.Must(template.New("profileviz").Parse(`
         .event-since-start-of-run {
             min-width: 100px;
         }
+		.traces-table {
+			width: 100%;
+		}
     </style>
     
     <script src="https://unpkg.com/htm@2.2.1" crossorigin></script>
@@ -112,14 +115,14 @@ var gotpl = template.Must(template.New("profileviz").Parse(`
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     
     <script type="module">
-		window.tracerData = {{.TracerDataJSON}}
+		window.traces = {{.TracerDataJSON}};
 		{{.MainJS}}
     </script>
     </head>
 
 
     <body>
-        <h1> React + htm Demo</h1>
+        <h1>Tracing</h1>
         <div id="App"></div>
     </body>
 </html>
