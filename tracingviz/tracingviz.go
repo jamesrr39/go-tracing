@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"io"
+	"log"
 	"os"
 
 	"github.com/golang/protobuf/proto"
@@ -15,6 +16,15 @@ import (
 
 //go:embed main.js
 var mainJS string
+
+//go:embed libs/htm/2.2.1/htm@2.2.1.js
+var htmLib string
+
+//go:embed libs/react/16/react.production.min.js
+var reactLib string
+
+//go:embed libs/react-dom/16/react-dom.production.min.js
+var reactDomLib string
 
 func streamToStorageReaderToRuns(reader *streamtostorage.Reader) ([]*tracing.Trace, errorsx.Error) {
 	traces := []*tracing.Trace{}
@@ -30,7 +40,9 @@ func streamToStorageReaderToRuns(reader *streamtostorage.Reader) ([]*tracing.Tra
 		trace := new(tracing.Trace)
 		err = proto.Unmarshal(b, trace)
 		if err != nil {
-			return nil, errorsx.Wrap(err)
+			// return nil, errorsx.Wrap(err)
+			log.Printf("failed to unmarshal trace. Error: %q\n", err)
+			continue
 		}
 
 		traces = append(traces, trace)
@@ -67,6 +79,9 @@ func Generate(dataFilePath, outFilePath string) errorsx.Error {
 	data := tplData{
 		TracerDataJSON: template.JS(tracesJSONData),
 		MainJS:         template.JS(mainJS),
+		HtmLib:         template.JS(htmLib),
+		ReactLib:       template.JS(reactLib),
+		ReactDomLib:    template.JS(reactDomLib),
 	}
 
 	err = gotpl.Execute(outFile, data)
@@ -78,7 +93,7 @@ func Generate(dataFilePath, outFilePath string) errorsx.Error {
 }
 
 type tplData struct {
-	TracerDataJSON, MainJS template.JS
+	TracerDataJSON, MainJS, HtmLib, ReactLib, ReactDomLib template.JS
 }
 
 var gotpl = template.Must(template.New("profileviz").Parse(`
@@ -108,11 +123,9 @@ var gotpl = template.Must(template.New("profileviz").Parse(`
 		}
     </style>
     
-    <script src="https://unpkg.com/htm@2.2.1" crossorigin></script>
-    <!--<script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>-->
-    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-    <!--<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>-->
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script type="text/javascript">{{.HtmLib}}</script>
+	<script type="text/javascript">{{.ReactLib}}</script>
+	<script type="text/javascript">{{.ReactDomLib}}</script>
     
     <script type="module">
 		window.traces = {{.TracerDataJSON}};

@@ -60,21 +60,22 @@ function TraceRow(props) {
                     </thead>
                     <tbody>
                         ${trace.spans.map((span, idx) => {
+                            const spanDuration = span.endTimeNanos - span.startTimeNanos;
                             const percentageThroughFromStart = (span.startTimeNanos - trace.startTimeNanos) * 100 / traceDurationNanos;
                             const style = {
                                 borderLeft: '1px solid blue',
                                 marginLeft: `${percentageThroughFromStart}%`,
                                 minWidth: '1px',
-                                width: `${((span.endTimeNanos - span.startTimeNanos) * 100) / (traceDurationNanos)}%`,
+                                width: `${(spanDuration * 100) / (traceDurationNanos)}%`,
                                 height: '20px', // TODO: better measurement
                                 backgroundColor: 'blue',
                             };
                             return jsx`
                             <tr key=${idx}>
                                 <td className="event-name">${span.name}</td>
-                                <td className="event-since-start-of-run">${nanosToMs(span.endTimeNanos - span.startTimeNanos)}ms</td>
-                                <td title="${span.name}" className="event-percentage-through-cell">
-                                    <div style="${style}" title="${span.name}"></div>
+                                <td className="event-since-start-of-run">${nanosToMs(spanDuration)}ms</td>
+                                <td title="${span.name}: ${nanosToMs(spanDuration)}ms" className="event-percentage-through-cell">
+                                    <div style="${style}"></div>
                                 </td>
                             </tr>
                         `})}
