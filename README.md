@@ -14,3 +14,6 @@ To run the example:
 - `go run example/example_http_server.go` (this will print out the location of the newly-creating tracer file)
 - `go run tracingviz/cmd/tracingviz-main.go <path-to-tracer-file> <desired-html-output-file-path>`
 - open `<desired-html-output-file-path>` with a modern web browser.
+
+What you should see:
+![Selection_097](https://user-images.githubusercontent.com/4579573/115503945-7b65a900-a277-11eb-8698-97edf3c74cfc.png)
