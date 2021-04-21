@@ -73,7 +73,7 @@ function TraceRow(props) {
                             <tr key=${idx}>
                                 <td className="event-name">${span.name}</td>
                                 <td className="event-since-start-of-run">${nanosToMs(span.endTimeNanos - span.startTimeNanos)}ms</td>
-                                <td title="${percentageThroughFromStart}%" className="event-percentage-through-cell">
+                                <td title="${span.name}" className="event-percentage-through-cell">
                                     <div style="${style}" title="${span.name}"></div>
                                 </td>
                             </tr>

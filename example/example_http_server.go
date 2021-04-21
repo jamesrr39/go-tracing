@@ -26,17 +26,17 @@ func main() {
 	tempdir, err := ioutil.TempDir("", "")
 	must.NoError(err)
 
-	profilePath := filepath.Join(tempdir, "profile.pbf")
-	log.Printf("writing profile to %s\n", profilePath)
+	tracerPath := filepath.Join(tempdir, "tracing.pbf")
+	log.Printf("writing profile to %s\n", tracerPath)
 
-	f, err := os.Create(profilePath)
+	f, err := os.Create(tracerPath)
 	must.NoError(err)
 	defer f.Close()
 
-	profileWriter, err := streamtostorage.NewWriter(f, streamtostorage.MessageSizeBufferLenDefault)
+	tracerWriter, err := streamtostorage.NewWriter(f, streamtostorage.MessageSizeBufferLenDefault)
 	must.NoError(err)
 
-	tracer := tracing.NewTracer(profileWriter)
+	tracer := tracing.NewTracer(tracerWriter)
 
 	router := chi.NewRouter()
 	router.Use(tracing.Middleware(tracer))
@@ -103,5 +103,11 @@ func exampleHandler(w http.ResponseWriter, r *http.Request) {
 	println("world")
 
 	time.Sleep(time.Millisecond * 500)
+	span.End(ctx)
+
+	span, err = tracing.StartSpan(ctx, "print quickly")
+	must.NoError(err)
+
+	println("quickly")
 	span.End(ctx)
 }
