@@ -1,4 +1,3 @@
-![Selection_097](https://user-images.githubusercontent.com/4579573/115503925-77398b80-a277-11eb-9dbf-704d8c233b8e.png)
 # go-tracing
 
 go-tracing is a lightweight, easy-to-use request tracing library. You can use it to see what parts of your system take a long time, and which parts are quicker.
