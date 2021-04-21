@@ -12,6 +12,7 @@ import (
 	_ "github.com/gogo/protobuf/gogoproto" // for protobuf generation libraries to be included
 	proto "github.com/gogo/protobuf/proto"
 	"github.com/google/uuid"
+	"github.com/jamesrr39/goutil/streamtostorage"
 )
 
 type key int
@@ -53,7 +54,13 @@ type Tracer struct {
 }
 
 func NewTracer(writer io.Writer) *Tracer {
-	return &Tracer{writer, time.Now, sync.Mutex{}}
+	tracerWriter, err := streamtostorage.NewWriter(writer, streamtostorage.MessageSizeBufferLenDefault)
+	if err != nil {
+		// should never happen
+		panic("Trace: error creating streamtostorage writer: " + err.Error())
+	}
+
+	return &Tracer{tracerWriter, time.Now, sync.Mutex{}}
 }
 
 func StartTrace(tracer *Tracer, name string) *Trace {
@@ -64,10 +71,10 @@ func StartTrace(tracer *Tracer, name string) *Trace {
 	}
 }
 
-func StartSpan(ctx context.Context, name string) (*Span, error) {
+func StartSpan(ctx context.Context, name string) *Span {
 	tracerVal := ctx.Value(TracerCtxKey)
 	if tracerVal == nil {
-		return nil, fmt.Errorf("Trace: no tracer in context")
+		panic("Trace: no tracer in context")
 	}
 
 	tracer := tracerVal.(*Tracer)
@@ -75,7 +82,7 @@ func StartSpan(ctx context.Context, name string) (*Span, error) {
 	return &Span{
 		Name:           name,
 		StartTimeNanos: tracer.nowFunc().UnixNano(),
-	}, nil
+	}
 }
 
 func (span *Span) End(ctx context.Context) {
@@ -93,6 +100,8 @@ func (span *Span) End(ctx context.Context) {
 	tracer := tracerVal.(*Tracer)
 	span.EndTimeNanos = tracer.nowFunc().UnixNano()
 
+	tracer.writeMu.Lock()
+	defer tracer.writeMu.Unlock() // FIXME lock only the trace, not the whole tracer
 	trace.Spans = append(trace.Spans, span)
 }
 

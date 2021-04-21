@@ -14,7 +14,6 @@ import (
 	"github.com/go-chi/chi"
 	tracing "github.com/jamesrr39/go-tracing"
 	"github.com/jamesrr39/goutil/must"
-	"github.com/jamesrr39/goutil/streamtostorage"
 )
 
 func main() {
@@ -33,10 +32,7 @@ func main() {
 	must.NoError(err)
 	defer f.Close()
 
-	tracerWriter, err := streamtostorage.NewWriter(f, streamtostorage.MessageSizeBufferLenDefault)
-	must.NoError(err)
-
-	tracer := tracing.NewTracer(tracerWriter)
+	tracer := tracing.NewTracer(f)
 
 	router := chi.NewRouter()
 	router.Use(tracing.Middleware(tracer))
@@ -88,8 +84,7 @@ func exampleHandler(w http.ResponseWriter, r *http.Request) {
 	// handler. This won't do anything, just mark some events, and sleep between them so we can see the timeline in the profileviz summary
 	ctx := r.Context()
 
-	span, err := tracing.StartSpan(ctx, "print hello and wait 1 second")
-	must.NoError(err)
+	span := tracing.StartSpan(ctx, "print hello and wait 1 second")
 
 	println("hello")
 
@@ -97,16 +92,14 @@ func exampleHandler(w http.ResponseWriter, r *http.Request) {
 
 	span.End(ctx)
 
-	span, err = tracing.StartSpan(ctx, "print world and wait 0.5 seconds")
-	must.NoError(err)
+	span = tracing.StartSpan(ctx, "print world and wait 0.5 seconds")
 
 	println("world")
 
 	time.Sleep(time.Millisecond * 500)
 	span.End(ctx)
 
-	span, err = tracing.StartSpan(ctx, "print quickly")
-	must.NoError(err)
+	span = tracing.StartSpan(ctx, "print quickly")
 
 	println("quickly")
 	span.End(ctx)
