@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sort"
 	"sync"
 	"time"
 
@@ -111,6 +112,10 @@ func (tracer *Tracer) EndTrace(trace *Trace, summary string) error {
 
 	trace.EndTimeNanos = endTime.UnixNano()
 	trace.Summary = summary
+
+	sort.Slice(trace.Spans, func(a, b int) bool {
+		return trace.Spans[a].StartTimeNanos < trace.Spans[b].StartTimeNanos
+	})
 
 	b, err := proto.Marshal(trace)
 	if err != nil {
