@@ -1,4 +1,4 @@
-package tracingviz
+package tracingvizpkg
 
 import (
 	_ "embed"

@@ -5,14 +5,24 @@ go-tracing is a lightweight, simple, easy-to-use request tracing library. You ca
 It consists of 2 parts:
 
 - The `tracing` package at `github.com/jamesrr39/go-tracing`. You call this part in your application. This then writes the traces to a file (or other writer). It uses the `streamtostorage` format, more info here: [Code](https://github.com/jamesrr39/goutil/tree/master/streamtostorage) | [GoDoc](https://pkg.go.dev/github.com/jamesrr39/goutil@v0.0.0-20210417135610-f7ebfe4dda4d/streamtostorage).
-- The `tracingviz/cmd/tracingviz-main.go` application. This reads the file, and converts it into an html file. This html file can then be opened and you can see all of your traces. This file is designed to be portable, so you can copy it between computers.
+- The `tracingviz/tracingviz-main.go` application. This reads the file, and converts it into an html file. This html file can then be opened and you can see all of your traces. This file is designed to be portable, so you can copy it between computers.
 
 Tracing using the `tracing` package relies heavily on the context, so you must have added the tracer and that specific trace to the context. The provided `Middleware` function will do that for you, if you want to use it for an HTTP server. If you want to use it for something, you can look at the `Middleware` function and adapt it for what you want.
+
+## Installation
+
+```
+# get the library to instrument your code
+go get github.com/jamesrr39/go-tracing
+
+# install the program to generate HTML visualisations of the trace outputs
+go get github.com/jamesrr39/go-tracing/tracingviz
+```
 
 To run the example:
 
 - `go run example/example_http_server.go` (this will print out the location of the newly-creating tracer file)
-- `go run tracingviz/cmd/tracingviz-main.go <path-to-tracer-file> <desired-html-output-file-path>`
+- `go run tracingviz/tracingviz-main.go <path-to-tracer-file> <desired-html-output-file-path>` (or `tracingviz <path-to-tracer-file> <desired-html-output-file-path>` if you used installed `tracingviz` with `go get`/`go install`)
 - open `<desired-html-output-file-path>` with a modern web browser.
 
 What you should see:
